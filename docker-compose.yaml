@@ -1,0 +1,18 @@
+version: "2.1"
+
+services:
+  ssh:
+    image: "linuxserver/openssh-server"
+    container_name: vpsgo-server
+    hostname: vpsgo-server
+    ports:
+      - "2222:2222"
+    environment:
+      - TZ=Asia/Hong_Kong
+      - PUID=1000
+      - PGID=1000
+      - USER_NAME=vpsgo
+      - USER_PASSWORD=vpsgo
+      - PASSWORD_ACCESS=true
+      - SUDO_ACCESS=true
+    restart: unless-stopped
