@@ -3,6 +3,7 @@ package ssh
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -40,7 +41,8 @@ func DefaultKnownHostsPath() (string, error) {
 		}
 	}
 
-	return fmt.Sprintf("%s/.ssh/known_hosts", home), err
+	path := filepath.Join(home, ".ssh", "known_hosts")
+	return fmt.Sprintf("%s", path), err
 }
 
 // DefaultKnownHosts returns host key callback from default known hosts path, and error if any.
@@ -120,7 +122,19 @@ func Ping(vps Vps, checkKnownhosts bool) (string, error) {
 	defer client.Close()
 
 	// Execute your command.
-	out, err := client.Run("lsb_release -a && echo 'Hostname: '`hostname` && echo 'Username: '`whoami`")
+	commands := []string{
+		"echo 'Kernel Name:                   '`uname -s`",
+		"echo 'Kernel Release:                '`uname -r`",
+		"echo 'Kernel Version:                '`uname -v`",
+		"echo 'Network Node Name:             '`uname -n`",
+		"echo 'Machine architecture:          '`uname -m`",
+		"echo 'Processor architecture:        '`uname -p`",
+		"echo 'HD Platform (OS architecture): '`uname -i`",
+		"echo 'Operating System:              '`uname -o`",
+		"echo 'Hostname:                      '`hostname`",
+		"echo 'Username:                      '`whoami`",
+	}
+	out, err := client.Run(strings.Join(commands, " && "))
 	if err != nil {
 		return "", err
 	}
