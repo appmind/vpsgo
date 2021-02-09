@@ -1,59 +1,91 @@
 # vpsgo
 
-极简 VPS 服务远程管理工具。
+`vpsgo` is a minimalist VPS services management tool.
 
-## 安装
+[简体中文](README_ZH.md)
 
+## 🔮 Vision
 
-## 使用
+`vpsgo` wants to be the simplest VPS service management tool. To manage VPS and servers, you can use various commands, web-based control panels, or use vpsgo.
 
-要求 VPS 安装 Linux 系统。当前支持 Ubuntu 20.04。
+## 📡 Overview
 
-### 注册 VPS
+`vpsgo` is a CLI tool developed in golang that helps you manage VPS services more simply and easily.
 
-注册 VPS 服务，同时配置 ssh 无密码证书登录。
+As we all know, VPS is a remote server. Usually you need to use ssh remote login to configure and manage it. You must be familiar with various operating commands, understand the server system and related characteristics, and have script programming skills to be competent in server management. Moreover, the related work is very tedious, time-consuming, laborious and full of risks. Now, you don’t need to care about all of these because of vpsgo.
 
-使用条件: 有系统 root 密码，且允许 ssh 密码登录。
+vpsgo integrates the best practices of server management and is developed using the cloud service development language Golang. vpsgo is committed to bringing you a light, simple, and efficient server management experience, reducing your mental burden and releasing your productivity.
 
-```sh
-vps reg VPS_NAME IP_ADDR [PORT]
-```
+## 📜 Installation
 
-**参数说明：**
-- VPS_NAME - 自定义 VPS 名称，必须唯一。
-- IP_ADDR - VPS 服务器 IP 地址。
-- PORT - ssh 服务端口号，默认 22。
+### Install from source
 
-注：命令行中大写的部分表示参数，带方括号的是可选参数，下同。
+#### Installing Go
 
-### 列表 VPS
+vpsgo requires Go 1.15 to compile, please refer to the [official documentation](https://golang.org/doc/install) for how to install Go in your system.
 
-显示当前已经注册的 VPS 列表。
+#### Installing Docker
 
-```sh
-vps list
-```
+You can use containers to practice `vpsgo` usage. Please refer to the [official documentation](https://docs.docker.com/engine/install/) for how to install Docker in your system.
 
-### 设置默认 VPS
+#### Installing build tools
 
-设置默认操作的 VPS 服务器。
+**Linux**
 
 ```sh
-vps use VPS_NAME
+# Ubuntu or Debian
+sudo apt-get install build-essential git
+
+# Fedora or CentOS
+sudo yum groupinstall "Development Tools"
+# or
+sudo yum install gcc git -y
 ```
 
-### 安装 VPS 服务
+**macOS**
 
-在默认 VPS 上安装服务软件。
+Open "Terminal" (it is located in Applications/Utilities)
+
+In the terminal window, run the command `xcode-select --install`
+
+In the windows that pops up, click Install, and agree to the Terms of Service.
+
+**Windows**
+
+It is recommended to use [WSL 2 (install Ubuntu)](https://docs.microsoft.com/en-us/windows/wsl/install-win10) and [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/get-started). Otherwise, please install [Git for Windows](https://gitforwindows.org/) to get `Git Bash` and many Linux commands. Then install [Chocolatecy](https://chocolatey.org/install) or [Scoop](https://scoop.sh/) to install some extended commands.
 
 ```sh
-vps install nginx
+choco install make
+# or
+scoop install make
 ```
 
-### 查看 VPS 状态
-
-查看指定或默认 VPS 服务当前状态。
+#### Compile vpsgo
 
 ```sh
-vps status [VPS_NAME]
+# Clone the repository to the "vpsgo" subdirectory
+git clone --depth 1 https://github.com/appmind/vpsgo.git vpsgo
+
+# Change working directory
+cd vpsgo
+
+# Compile the main program, dependencies will be downloaded at this step
+make install
 ```
+
+#### Test Installation
+
+```sh
+# Start the container server
+make docker-up
+
+# Check the container server
+vps ping 127.0.0.1 -p 22 -u root -P root
+
+# View usage help
+vps help
+```
+
+## ⚖️ License
+
+This project is under the Apache License 2.0. See the [LICENSE](LICENSE) file for the full license text.
