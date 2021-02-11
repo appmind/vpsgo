@@ -61,16 +61,19 @@ func DefaultKnownHosts() (ssh.HostKeyCallback, error) {
 func askPass(msg string) string {
 
 	fmt.Print(msg)
+	fd := int(os.Stdin.Fd())
 
-	pass, err := terminal.ReadPassword(0)
+	if terminal.IsTerminal(fd) {
+		pass, err := terminal.ReadPassword(fd)
+		if err != nil {
+			panic(err)
+		}
 
-	if err != nil {
-		panic(err)
+		fmt.Println("")
+		return strings.TrimSpace(string(pass))
 	}
 
-	fmt.Println("")
-
-	return strings.TrimSpace(string(pass))
+	return ""
 }
 
 // Ping connect and get information from the vps
