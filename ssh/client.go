@@ -74,15 +74,14 @@ func askPass(msg string) string {
 }
 
 // Ping connect and get information from the vps
-func Ping(vps Vps, checkKnownhosts bool) (string, error) {
+func Ping(vps Vps, issafe bool) (string, error) {
 
+	var err error
 	var auth goph.Auth
 	var callback ssh.HostKeyCallback
 
-	if checkKnownhosts {
-		var err error
-		callback, err = DefaultKnownHosts()
-		if err != nil {
+	if issafe {
+		if callback, err = DefaultKnownHosts(); err != nil {
 			return "", err
 		}
 	} else {
@@ -91,10 +90,12 @@ func Ping(vps Vps, checkKnownhosts bool) (string, error) {
 	}
 
 	if vps.Key != "" {
+		if vps.Pwd == "" && issafe {
+			msg := fmt.Sprintf("Private key passphrase: ")
+			vps.Pwd = askPass(msg)
+		}
 		// Start new ssh connection with private key.
-		var err error
-		auth, err = goph.Key(vps.Key, "")
-		if err != nil {
+		if auth, err = goph.Key(vps.Key, vps.Pwd); err != nil {
 			return "", err
 		}
 	} else {
