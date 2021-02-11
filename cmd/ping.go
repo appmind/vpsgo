@@ -10,28 +10,30 @@ import (
 )
 
 var (
-	addr string = "127.0.0.1"
-	port uint   = 22
-	user string = "root"
-	pwd  string = ""
+	addr    string = "127.0.0.1"
+	port    uint   = 22
+	user    string = "root"
+	pwd     string = ""
+	force   bool   = false
+	keyfile string = ""
 )
 
 var pingCmd = &cobra.Command{
-	Use:   "ping IP_ADDR",
+	Use:   "ping ADDRESS",
 	Short: "Connect and get information from the server",
-	Long:  `Connect and get information from the server.`,
+	Long:  `Connect and get information from the remote server.`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		addr = args[0]
 		vps := ssh.Vps{
 			Name: "ping",
 			Addr: addr,
-			Port: uint(port),
+			Port: port,
 			User: user,
 			Pwd:  pwd,
-			Key:  "",
+			Key:  keyfile,
 		}
-		msg, err := ssh.Ping(vps, false)
+		msg, err := ssh.Ping(vps, !force)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -42,7 +44,9 @@ var pingCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(pingCmd)
 	pingCmd.Flags().UintVarP(&port, "port", "p", 22, "IP port number of the SSH service")
-	pingCmd.Flags().StringVarP(&user, "user", "u", "root", "Username of the OS running the SSH service")
+	pingCmd.Flags().StringVarP(&user, "user", "u", "root", "Username of the remote system")
+	pingCmd.Flags().StringVarP(&keyfile, "keyfile", "k", "", "Private key (Identity file)")
+	pingCmd.Flags().BoolVarP(&force, "force", "f", false, "Ignore known hosts or Passphrase")
 	if runtime.GOOS == "windows" {
 		pingCmd.Flags().StringVarP(&pwd, "password", "P", "", "Password of the user (required)")
 		// In windows, the password flag must be set, because terminal don't support input
