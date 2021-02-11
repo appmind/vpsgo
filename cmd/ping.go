@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"runtime"
 
 	"github.com/appmind/vpsgo/ssh"
 	"github.com/spf13/cobra"
@@ -47,11 +46,5 @@ func init() {
 	pingCmd.Flags().StringVarP(&user, "user", "u", "root", "Username of the remote system")
 	pingCmd.Flags().StringVarP(&keyfile, "keyfile", "k", "", "Private key (Identity file)")
 	pingCmd.Flags().BoolVarP(&force, "force", "f", false, "Ignore known hosts or Passphrase")
-	if runtime.GOOS == "windows" {
-		pingCmd.Flags().StringVarP(&pwd, "password", "P", "", "Password of the user (required)")
-		// In windows, the password flag must be set, because terminal don't support input
-		pingCmd.MarkFlagRequired("password")
-	} else {
-		pingCmd.Flags().StringVarP(&pwd, "password", "P", "", "Password of the user")
-	}
+	pingCmd.Flags().StringVarP(&pwd, "password", "P", "", "Password or Passphrase")
 }
