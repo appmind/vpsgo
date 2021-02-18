@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/appmind/vpsgo/common"
+	"github.com/appmind/vpsgo/config"
 	"github.com/appmind/vpsgo/ssh"
 	"github.com/spf13/cobra"
 )
@@ -32,11 +34,12 @@ var pingCmd = &cobra.Command{
 			Pwd:  pwd,
 			Key:  keyfile,
 		}
-		msg, err := ssh.Ping(vps, !force)
+		msg, err := ssh.Ping(vps, common.SafeMode(force))
 		if err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println(msg)
+		config.AddHostToConfig(vps)
 	},
 }
 
