@@ -8,20 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/appmind/vpsgo/config"
 	"github.com/melbahja/goph"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 )
-
-// Vps define vps server config
-type Vps struct {
-	Name string
-	Addr string
-	Port uint
-	User string
-	Pwd  string
-	Key  string
-}
 
 // DefaultKnownHostsPath returns default user knows hosts file.
 func DefaultKnownHostsPath() (string, error) {
@@ -76,9 +67,8 @@ func askPass(msg string) string {
 	return ""
 }
 
-// Ping connect and get information from the vps
-func Ping(vps Vps, issafe bool) (string, error) {
-
+// Exec send and execute host commands via ssh
+func Exec(cmds []string, host config.Host, pwd string, issafe bool) (string, error) {
 	var err error
 	var auth goph.Auth
 	var callback ssh.HostKeyCallback
@@ -92,27 +82,26 @@ func Ping(vps Vps, issafe bool) (string, error) {
 		callback = ssh.InsecureIgnoreHostKey()
 	}
 
-	if vps.Key != "" {
-		if vps.Pwd == "" && issafe {
-			msg := fmt.Sprintf("Private key passphrase: ")
-			vps.Pwd = askPass(msg)
-		}
+	if host.Keyfile != "" {
 		// Start new ssh connection with private key.
-		if auth, err = goph.Key(vps.Key, vps.Pwd); err != nil {
-			return "", err
+		if auth, err = goph.Key(host.Keyfile, pwd); err != nil {
+			// ssh: this private key is passphrase protected
+			pwd = askPass("Private key passphrase: ")
+			if auth, err = goph.Key(host.Keyfile, pwd); err != nil {
+				return "", err
+			}
 		}
 	} else {
-		if vps.Pwd == "" {
-			msg := fmt.Sprintf("%s@%s's password: ", vps.User, vps.Addr)
-			vps.Pwd = askPass(msg)
+		if pwd == "" {
+			pwd = askPass(fmt.Sprintf("%s@%s's password: ", host.User, host.Addr))
 		}
-		auth = goph.Password(vps.Pwd)
+		auth = goph.Password(pwd)
 	}
 
 	client, err := goph.NewConn(&goph.Config{
-		User:     vps.User,
-		Addr:     vps.Addr,
-		Port:     vps.Port,
+		User:     host.User,
+		Addr:     host.Addr,
+		Port:     host.Port,
 		Auth:     auth,
 		Timeout:  5 * time.Second,
 		Callback: callback,
@@ -126,19 +115,7 @@ func Ping(vps Vps, issafe bool) (string, error) {
 	defer client.Close()
 
 	// Execute your command.
-	commands := []string{
-		"echo 'Kernel Name:                   '`uname -s`",
-		"echo 'Kernel Release:                '`uname -r`",
-		"echo 'Kernel Version:                '`uname -v`",
-		"echo 'Network Node Name:             '`uname -n`",
-		"echo 'Machine architecture:          '`uname -m`",
-		"echo 'Processor architecture:        '`uname -p`",
-		"echo 'HD Platform (OS architecture): '`uname -i`",
-		"echo 'Operating System:              '`uname -o`",
-		"echo 'Hostname:                      '`hostname`",
-		"echo 'Username:                      '`whoami`",
-	}
-	out, err := client.Run(strings.Join(commands, " && "))
+	out, err := client.Run(strings.Join(cmds, " && "))
 	if err != nil {
 		return "", err
 	}
