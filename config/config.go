@@ -4,25 +4,24 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/appmind/vpsgo/common"
-	"github.com/appmind/vpsgo/ssh"
 	"github.com/spf13/viper"
 )
 
 type Config struct {
 	safemode bool      `mapstructure:"safemode"`
-	phost    uint      `mapstructure:"phost"`
+	hostname string    `mapstructure:"hostname"`
 	hosts    []Host    `mapstructure:"hosts"`
 	services []Service `mapstructure:"services"`
 }
 
 type Host struct {
+	ID      string `mapstructure:"id"`
 	Name    string `mapstructure:"name"`
 	Addr    string `mapstructure:"addr"`
-	Port    string `mapstructure:"port"`
+	Port    uint   `mapstructure:"port"`
 	User    string `mapstructure:"user"`
 	Keyfile string `mapstructure:"keyfile"`
 }
@@ -42,7 +41,6 @@ func setConfig() {
 	viper.AutomaticEnv()
 	if _, err := os.Stat(filename); err != nil {
 		viper.Set("safemode", false)
-		viper.Set("phost", 0)
 		viper.Set("hosts", []Host{})
 		viper.Set("services", []Service{})
 		if err = viper.SafeWriteConfig(); err != nil {
@@ -84,17 +82,21 @@ func AppendHost(host Host) []Host {
 	return hosts
 }
 
-func AddHostToConfig(vps ssh.Vps) {
-	port := strconv.Itoa(int(vps.Port))
-	name := common.MakeHash([]string{vps.Addr, port, vps.User})
-	host := Host{
-		Name:    name[0:5],
-		Addr:    vps.Addr,
-		Port:    port,
-		User:    vps.User,
-		Keyfile: vps.Key,
-	}
-	SaveConfig(map[string]interface{}{
-		"hosts": AppendHost(host),
+func SaveHostToConfig(host Host) error {
+	return SaveConfig(map[string]interface{}{
+		"hosts":    AppendHost(host),
+		"hostname": host.Name,
+	})
+}
+
+func HostnameToConfig(hostname string) error {
+	return SaveConfig(map[string]interface{}{
+		"hostname": hostname,
+	})
+}
+
+func SafemodeToConfig(safemode bool) error {
+	return SaveConfig(map[string]interface{}{
+		"safemode": safemode,
 	})
 }
