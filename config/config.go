@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"log"
 	"os"
 	"path/filepath"
@@ -11,8 +12,7 @@ import (
 )
 
 type Config struct {
-	safemode bool      `mapstructure:"safemode"`
-	hostname string    `mapstructure:"hostname"`
+	active   string    `mapstructure:"active"`
 	hosts    []Host    `mapstructure:"hosts"`
 	services []Service `mapstructure:"services"`
 }
@@ -38,9 +38,9 @@ func setConfig() {
 	viper.SetConfigName(name[0])
 	viper.SetConfigType(name[1])
 	viper.AddConfigPath(dir)
-	viper.AutomaticEnv()
+	// viper.AutomaticEnv()
 	if _, err := os.Stat(filename); err != nil {
-		viper.Set("safemode", false)
+		viper.Set("active", "")
 		viper.Set("hosts", []Host{})
 		viper.Set("services", []Service{})
 		if err = viper.SafeWriteConfig(); err != nil {
@@ -84,19 +84,45 @@ func AppendHost(host Host) []Host {
 
 func SaveHostToConfig(host Host) error {
 	return SaveConfig(map[string]interface{}{
-		"hosts":    AppendHost(host),
-		"hostname": host.Name,
+		"hosts":  AppendHost(host),
+		"active": host.Name,
 	})
 }
 
-func HostnameToConfig(hostname string) error {
+func SetActiveHost(hostname string) error {
 	return SaveConfig(map[string]interface{}{
-		"hostname": hostname,
+		"active": hostname,
 	})
 }
 
-func SafemodeToConfig(safemode bool) error {
-	return SaveConfig(map[string]interface{}{
-		"safemode": safemode,
-	})
+func GetHostname(args []string) (hostname string) {
+	if len(args) > 0 {
+		hostname = args[0]
+	} else {
+		hostname = viper.GetString("active")
+	}
+	if hostname == "" {
+		log.Fatal("No target host.")
+	}
+
+	return
+}
+
+func GetHostByName(name string) (host Host, err error) {
+	index := -1
+	hosts := []Host{}
+	err = errors.New("The host does not exist")
+	viper.UnmarshalKey("hosts", &hosts)
+	for key, value := range hosts {
+		if value.Name == name {
+			index = key
+			break
+		}
+	}
+
+	if index >= 0 {
+		host = hosts[index]
+		err = nil
+	}
+	return
 }

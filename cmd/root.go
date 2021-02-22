@@ -5,9 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
-	"github.com/appmind/vpsgo/ssh"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -16,12 +14,13 @@ import (
 
 var cfgFile string
 
+var Force bool = false
+
 var (
-	port    uint   = 22
-	user    string = "root"
-	pwd     string = ""
-	force   bool   = false
-	keyfile string = ""
+	Port    uint   = 22
+	User    string = "root"
+	Pwd     string = ""
+	Keyfile string = ""
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -84,24 +83,4 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
-}
-
-func setPubkey(host config.Host, pwd string, issafe bool) (string, error) {
-	keystr, err := common.GetKeyString(keyfile + ".pub")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if keystr == "" {
-		log.Fatal("Invalid public key.")
-	}
-
-	commands := []string{
-		"mkdir -p ~/.ssh",
-		// "touch ~/.ssh/authorized_keys",
-		fmt.Sprintf("echo '%s' > ~/.ssh/authorized_keys", keystr),
-		"chmod -R go= ~/.ssh",
-		"echo 'done.'",
-	}
-
-	return ssh.Exec(commands, host, pwd, issafe)
 }

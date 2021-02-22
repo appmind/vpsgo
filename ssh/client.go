@@ -68,18 +68,17 @@ func askPass(msg string) string {
 }
 
 // Exec send and execute host commands via ssh
-func Exec(cmds []string, host config.Host, pwd string, issafe bool) (string, error) {
+func Exec(cmds []string, host config.Host, pwd string, force bool) (string, error) {
 	var err error
 	var auth goph.Auth
 	var callback ssh.HostKeyCallback
 
-	if issafe {
+	if force {
+		callback = ssh.InsecureIgnoreHostKey()
+	} else {
 		if callback, err = DefaultKnownHosts(); err != nil {
 			return "", err
 		}
-	} else {
-		// if there a "man in the middle proxy", this can harm you!
-		callback = ssh.InsecureIgnoreHostKey()
 	}
 
 	if host.Keyfile != "" {
@@ -96,6 +95,10 @@ func Exec(cmds []string, host config.Host, pwd string, issafe bool) (string, err
 			pwd = askPass(fmt.Sprintf("%s@%s's password: ", host.User, host.Addr))
 		}
 		auth = goph.Password(pwd)
+	}
+
+	if os.Getenv("GO") == "DEBUG" {
+		fmt.Println(host, pwd, force)
 	}
 
 	client, err := goph.NewConn(&goph.Config{
