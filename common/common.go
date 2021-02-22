@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
-
-	"github.com/spf13/viper"
+	"time"
 )
 
 // GetHomeDir returns the current user's home directory.
@@ -32,14 +32,6 @@ func ConfigFilename() string {
 	return filepath.Join(GetAppHomeDir(), "config.yaml")
 }
 
-func SafeMode(force bool) bool {
-	if force {
-		return false
-	} else {
-		return viper.GetBool("safemode")
-	}
-}
-
 func MakeHash(in []string) string {
 	s := strings.Join(in, " ")
 	v := sha1.Sum([]byte(s))
@@ -47,13 +39,18 @@ func MakeHash(in []string) string {
 }
 
 // MakeKeyfile 调用 ssh-keygen 生成密钥保存到应用目录
-func MakeKeyfile(name string) (string, error) {
+func MakeKeyfile(name string, force bool) (string, error) {
 	keyfile := filepath.Join(GetAppHomeDir(), name)
 	if name == "" || keyfile == "" {
-		log.Fatal("Message: name is required.")
+		log.Fatal("Name is required.")
 	}
 	if _, err := os.Stat(keyfile); err == nil {
-		log.Fatalf("%s already exists.\n", keyfile)
+		if force {
+			os.Remove(keyfile)
+			os.Remove(keyfile + ".pub")
+		} else {
+			log.Fatalf("%s already exists.\n", keyfile)
+		}
 	}
 
 	cmd := exec.Command(
@@ -78,4 +75,9 @@ func GetKeyString(keyfile string) (string, error) {
 	defer file.Close()
 	keystr, err := ioutil.ReadAll(file)
 	return string(keystr), err
+}
+
+func GetRandNumber(min, max int) int {
+	rand.Seed(time.Now().UnixNano())
+	return (rand.Intn(max-min+1) + min)
 }

@@ -31,7 +31,7 @@ func TestExec(t *testing.T) {
 		"echo 'Machine architecture: '`uname -m`",
 	}
 
-	out, _ := Exec(commands, host, "test", false)
+	out, _ := Exec(commands, host, "test", true)
 	re1 := regexp.MustCompile(`(Network[ a-zA-Z:]+)(\w+)`)
 	out = re1.ReplaceAllString(out, "${1}-")
 

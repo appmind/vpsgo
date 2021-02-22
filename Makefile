@@ -1,5 +1,8 @@
 .DEFAULT_GOAL := build
+SSH_PORT := ${SSHPORT}
+ifeq ($(SSH_PORT),)
 SSH_PORT := 22
+endif
 
 APP := vps
 PROJ := vpsgo
@@ -38,10 +41,10 @@ clean:
 	@rm -f $(BIN_FILE) $(INSTALL)/bin/$(BIN_FILE)
 
 run:
-	go run -race $(APP).go
+	@go run -race $(APP).go
 
 test:
-	go test -cover -race ./...
+	@go test -cover ./...
 
 deps:
 	GO111MODULE=on go get -u github.com/spf13/cobra
@@ -63,12 +66,12 @@ pack: build
 	cd $(RELEASE_ROOT) && zip -r $(RELEASE_FILE)-$(NOW)-$(COMMIT_SHA).zip $(PROJ)
 
 .PHONY: docker-build
-docker-build: build
+docker-build: install
 	docker build -t $(PROJ):$(COMMIT_SHA) .
 
 .PHONY: docker-up
 docker-up: docker-build
-	docker run --name $(PROJ) -p $(SSH_PORT):22 -d $(PROJ):$(COMMIT_SHA)
+	docker run --name $(PROJ) -p $(SSH_PORT):$(SSH_PORT) -d $(PROJ):$(COMMIT_SHA)
 
 .PHONY: docker-down
 docker-down:

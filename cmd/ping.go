@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
 	"github.com/appmind/vpsgo/ssh"
 	"github.com/spf13/cobra"
@@ -20,11 +19,12 @@ var pingCmd = &cobra.Command{
 		host := config.Host{
 			Name:    "ping",
 			Addr:    addr,
-			Port:    port,
-			User:    user,
-			Keyfile: keyfile,
+			Port:    Port,
+			User:    User,
+			Keyfile: Keyfile,
 		}
-		msg, err := ping(host, pwd, common.SafeMode(force))
+
+		msg, err := ping(host, Pwd, true)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -34,14 +34,13 @@ var pingCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(pingCmd)
-	pingCmd.Flags().BoolVarP(&force, "force", "f", false, "Ignore known_hosts check")
-	pingCmd.Flags().UintVarP(&port, "port", "p", 22, "IP port number of the SSH service")
-	pingCmd.Flags().StringVarP(&user, "user", "u", "root", "Username of the remote system")
-	pingCmd.Flags().StringVarP(&keyfile, "idfile", "i", "", "Identity file (Private key)")
-	pingCmd.Flags().StringVarP(&pwd, "password", "P", "", "Password or Passphrase")
+	pingCmd.Flags().UintVarP(&Port, "port", "p", 22, "port number of the ssh service")
+	pingCmd.Flags().StringVarP(&User, "user", "u", "root", "username of the system running ssh")
+	pingCmd.Flags().StringVarP(&Keyfile, "idfile", "i", "", "identity file (private key)")
+	pingCmd.Flags().StringVarP(&Pwd, "password", "P", "", "password or passphrase")
 }
 
-func ping(host config.Host, pwd string, issafe bool) (string, error) {
+func ping(host config.Host, pwd string, force bool) (string, error) {
 	commands := []string{
 		"echo 'Kernel Name:          '`uname -s`",
 		"echo 'Kernel Release:       '`uname -r`",
@@ -49,5 +48,5 @@ func ping(host config.Host, pwd string, issafe bool) (string, error) {
 		"echo 'Network Node Name:    '`uname -n`",
 		"echo 'Machine architecture: '`uname -m`",
 	}
-	return ssh.Exec(commands, host, pwd, issafe)
+	return ssh.Exec(commands, host, pwd, force)
 }
