@@ -8,7 +8,7 @@
 
 **vpsgo** wants to be the simplest VPS service management tool.
 
-To manage VPS and servers, you can use various commands, web-based control panels, or use vpsgo.
+To manage VPS host, just vpsgo.
 
 ## 📡 Overview
 

@@ -11,8 +11,8 @@ import (
 
 var pingCmd = &cobra.Command{
 	Use:   "ping ADDRESS",
-	Short: "Connect and get information from the host",
-	Long:  `Connect and get information from the remote server.`,
+	Short: "Get response from the host",
+	Long:  `Get response from the host.`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		addr := args[0]

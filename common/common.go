@@ -38,6 +38,10 @@ func MakeHash(in []string) string {
 	return fmt.Sprintf("%x", v)
 }
 
+func MakeHostID(in []string) string {
+	return MakeHash(in)[0:5]
+}
+
 // MakeKeyfile 调用 ssh-keygen 生成密钥保存到应用目录
 func MakeKeyfile(name string, force bool) (string, error) {
 	keyfile := filepath.Join(GetAppHomeDir(), name)
