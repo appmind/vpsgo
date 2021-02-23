@@ -10,7 +10,7 @@ import (
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "Print VPS list",
+	Short: "Print VPS host list",
 	Long:  `Print VPS list. A flag points to the default host.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		hosts := []config.Host{}

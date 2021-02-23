@@ -1,16 +1,18 @@
 # vpsgo
 
-`vpsgo` is a minimalist VPS services management tool.
+**vpsgo** is a minimalist VPS services management tool.
 
 [简体中文](README_ZH.md)
 
 ## 🔮 Vision
 
-`vpsgo` wants to be the simplest VPS service management tool. To manage VPS and servers, you can use various commands, web-based control panels, or use vpsgo.
+**vpsgo** wants to be the simplest VPS service management tool.
+
+To manage VPS and servers, you can use various commands, web-based control panels, or use vpsgo.
 
 ## 📡 Overview
 
-`vpsgo` is a CLI tool developed in golang that helps you manage VPS services more simply and easily.
+**vpsgo** is a CLI tool developed in golang that helps you manage VPS services more simply and easily.
 
 As we all know, VPS is a remote server. Usually you need to use ssh remote login to configure and manage it. You must be familiar with various operating commands, understand the server system and related characteristics, and have script programming skills to be competent in server management. Moreover, the related work is very tedious, time-consuming, laborious and full of risks. Now, you don’t need to care about all of these because of vpsgo.
 
@@ -30,7 +32,7 @@ You can use containers to practice `vpsgo` usage. Please refer to the [official 
 
 #### Installing build tools
 
-**Linux**
+- Linux
 
 ```sh
 # Ubuntu or Debian
@@ -42,7 +44,7 @@ sudo yum groupinstall "Development Tools"
 sudo yum install gcc git -y
 ```
 
-**macOS**
+- macOS
 
 Open "Terminal" (it is located in Applications/Utilities)
 
@@ -50,7 +52,7 @@ In the terminal window, run the command `xcode-select --install`
 
 In the windows that pops up, click Install, and agree to the Terms of Service.
 
-**Windows**
+- Windows
 
 It is recommended to use [WSL 2 (install Ubuntu)](https://docs.microsoft.com/en-us/windows/wsl/install-win10) and [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/get-started). Otherwise, please install [Git for Windows](https://gitforwindows.org/) to get `Git Bash` and many Linux commands. Then install [Chocolatecy](https://chocolatey.org/install) or [Scoop](https://scoop.sh/) to install some extended commands.
 
