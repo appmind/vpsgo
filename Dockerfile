@@ -20,7 +20,7 @@ RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/
 echo 'root:root' | chpasswd && \
 useradd -rm -d /home/test -s /bin/bash -g root -G sudo -u 1000 test && \
 echo 'test:test' | chpasswd
-RUN service ssh start
 
 EXPOSE 22
+RUN service ssh start
 CMD ["/usr/sbin/sshd","-D"]

@@ -11,9 +11,10 @@ import (
 )
 
 var setpwdCmd = &cobra.Command{
-	Use:   "setpwd [hostname]",
+	Use:   "setpwd HOSTNAME",
 	Short: "Disable password login or Change password",
 	Long:  `Disable password login or Change password.`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		hostname := config.GetHostname(args)
 		host, err := config.GetHostByName(hostname)
@@ -35,14 +36,15 @@ var setpwdCmd = &cobra.Command{
 				log.Fatal("Maybe need to execute 'vps setkey' first")
 			}
 			commands = []string{
-				// #PasswordAuthentication yes
-				"sudo sed -i 's/PermitRootLogin yes/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config",
+				"sudo sed -i 's/PermitRootLogin yes/#PermitRootLogin prohibit-password/' /etc/ssh/sshd_config",
+				"sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config",
 				"sudo service ssh reload 2>&1 >/dev/null",
 				"echo 'done.'",
 			}
 		} else {
 			commands = []string{
-				"sudo sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config",
+				"sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config",
+				"sudo sed -i 's/PasswordAuthentication no/#PasswordAuthentication yes/' /etc/ssh/sshd_config",
 				fmt.Sprintf("echo '%s:%s' | sudo chpasswd", host.User, Pwd),
 				"sudo service ssh reload 2>&1 >/dev/null",
 				"echo 'done.'",
@@ -60,5 +62,5 @@ var setpwdCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(setpwdCmd)
-	setpwdCmd.Flags().StringVarP(&Pwd, "password", "P", "", "default is empty, it is forbidden")
+	setpwdCmd.Flags().StringVarP(&Pwd, "password", "P", "", "\"\" is empty, it is forbidden")
 }

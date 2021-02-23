@@ -1,10 +1,14 @@
-# vpsgo - 极简 VPS 服务远程管理工具。
+# vpsgo
+
+极简 VPS 服务远程管理工具。
 
 [English Version](README.md)
 
 ## 愿景
 
 vpsgo 想要做最简单的 VPS 服务器管理工具。
+
+管理 VPS，可以使用各种命令，基于Web的控制面板，或者 vpsgo。
 
 ## 简介
 
@@ -26,7 +30,7 @@ vpsgo 需要 Go 1.15 编译, 请参考 [官方文档](https://golang.org/doc/ins
 
 #### 安装构建工具
 
-**Linux**
+- Linux
 
 ```sh
 # Ubuntu or Debian
@@ -38,7 +42,7 @@ sudo yum groupinstall "Development Tools"
 sudo yum install gcc git -y
 ```
 
-**macOS**
+- macOS
 
 打开 "终端"（位于 应用/工具）
 
@@ -46,7 +50,7 @@ sudo yum install gcc git -y
 
 在弹出的窗口中点击 Install 安装，选择 同意 Terms of Service 服务条款。
 
-**Windows**
+- Windows
 
 推荐使用 [WSL 2 (安装Ubuntu)](https://docs.microsoft.com/en-us/windows/wsl/install-win10) 和 [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/get-started)。否则，请安装 [Git for Windows](https://gitforwindows.org/) 以获得 `Git Bash` 和许多 Linux 命令. 然后安装 [Chocolatecy](https://chocolatey.org/install) 或 [Scoop](https://scoop.sh/) 以便安装相关扩展工具。
 

@@ -11,7 +11,8 @@ import (
 var useCmd = &cobra.Command{
 	Use:   "use HOSTNAME",
 	Short: "Set the default VPS host",
-	Long:  `Set the default VPS host by the host name.`,
+	Long:  `Set the default host by the name in the 'vps list'.`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		hostname := ""
 		if len(args) > 0 {

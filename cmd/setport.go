@@ -11,9 +11,10 @@ import (
 )
 
 var setportCmd = &cobra.Command{
-	Use:   "setport [hostname]",
+	Use:   "setport HOSTNAME",
 	Short: "Change port (perhaps need to configure firewall)",
 	Long:  `Change the ssh port number (perhaps need to configure firewall).`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		hostname := config.GetHostname(args)
 		host, err := config.GetHostByName(hostname)

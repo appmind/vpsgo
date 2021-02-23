@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -106,7 +107,7 @@ func GetHostname(args []string) (hostname string) {
 		hostname = viper.GetString("active")
 	}
 	if hostname == "" {
-		log.Fatal("No default host.")
+		log.Fatal("Provide parameter or execute 'vps use' first.")
 	}
 
 	return
@@ -115,7 +116,8 @@ func GetHostname(args []string) (hostname string) {
 func GetHostByName(name string) (host Host, err error) {
 	index := -1
 	hosts := []Host{}
-	err = errors.New("The host does not exist")
+	msg := fmt.Sprintf("'%s' does not exist, 'vps new' or 'vps list' first.", name)
+	err = errors.New(msg)
 	viper.UnmarshalKey("hosts", &hosts)
 	for key, value := range hosts {
 		if value.Name == name {
