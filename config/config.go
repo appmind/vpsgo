@@ -90,11 +90,15 @@ func SaveHostToConfig(host Host) error {
 }
 
 func SetActiveHost(hostname string) error {
+	if _, err := GetHostByName(hostname); err != nil {
+		log.Fatal(err)
+	}
 	return SaveConfig(map[string]interface{}{
 		"active": hostname,
 	})
 }
 
+// GetHostname by the first parameter or configration
 func GetHostname(args []string) (hostname string) {
 	if len(args) > 0 {
 		hostname = args[0]
@@ -102,7 +106,7 @@ func GetHostname(args []string) (hostname string) {
 		hostname = viper.GetString("active")
 	}
 	if hostname == "" {
-		log.Fatal("No target host.")
+		log.Fatal("No default host.")
 	}
 
 	return
