@@ -1,6 +1,7 @@
 package ssh
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 
@@ -32,10 +33,11 @@ func TestExec(t *testing.T) {
 	}
 
 	out, _ := Exec(commands, host, "test", true)
-	re1 := regexp.MustCompile(`(Network[ a-zA-Z:]+)(\w+)`)
+	re1 := regexp.MustCompile(`(Network[ a-zA-Z:]+\b)(\w+)`)
 	out = re1.ReplaceAllString(out, "${1}-")
 
 	if out != msg {
+		fmt.Println(out)
 		t.Error("result is not equal")
 	}
 }

@@ -14,33 +14,33 @@ var rmCmd = &cobra.Command{
 	Long:  `Remove a VPS host from the VPS list.`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		hostname := args[0]
+		idname := args[0]
 		hosts := []config.Host{}
 		newHosts := []config.Host{}
 		viper.UnmarshalKey("hosts", &hosts)
 
-		hostid := ""
-		for _, value := range hosts {
-			if value.Name != hostname {
+		index := -1
+		for key, value := range hosts {
+			if value.ID != idname && value.Name != idname {
 				newHosts = append(newHosts, value)
 			} else {
-				hostid = value.ID
+				index = key
 			}
 		}
 
 		active := viper.GetString("active")
-		if hostid == active {
+		if hosts[index].ID == active || hosts[index].Name == active {
 			active = ""
 		}
 
-		if hostid != "" {
-			fmt.Printf("host '%s' removed.", hostname)
+		if index >= 0 {
 			config.SaveConfig(map[string]interface{}{
 				"hosts":  newHosts,
 				"active": active,
 			})
+			fmt.Printf("host '%s' is removed", idname)
 		} else {
-			fmt.Printf("host '%s' not found.", hostname)
+			fmt.Printf("host '%s' not found", idname)
 		}
 	},
 }

@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"log"
-
+	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -14,15 +13,14 @@ var useCmd = &cobra.Command{
 	Long:  `Set the default host by the name in the 'vps list'.`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		hostname := ""
-		if len(args) > 0 {
-			hostname = args[0]
-		}
-		if hostname == "" {
-			log.Fatal("A host name in the 'vps list' is required.")
+		hostname := args[0]
+		active := viper.GetString("active")
+		host, err := config.GetHostByName(hostname)
+		if err != nil {
+			common.Exit(err.Error(), 1)
 		}
 
-		if hostname != viper.GetString("active") {
+		if host.ID != active && host.Name != active {
 			config.SetActiveHost(hostname)
 		}
 	},

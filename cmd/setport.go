@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	"os"
+	"strings"
 
 	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
@@ -11,37 +12,39 @@ import (
 )
 
 var setportCmd = &cobra.Command{
-	Use:   "setport HOSTNAME",
+	Use:   "setport [hostname]",
 	Short: "Change port (perhaps need to configure firewall)",
 	Long:  `Change the ssh port number (perhaps need to configure firewall).`,
-	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		hostname := config.GetHostname(args)
 		host, err := config.GetHostByName(hostname)
 		if err != nil {
-			log.Fatal(err)
+			common.Exit(err.Error(), 1)
 		}
 
 		if !Force && (Port != 22 && Port != 0) {
-			log.Fatal("Only 22 or 0 is allowed")
+			common.Exit("Only 22 or 0 is allowed", 1)
 		}
 		if Port == 0 {
 			Port = uint(common.GetRandNumber(32768, 61000))
 		}
 		if Port == host.Port {
-			log.Fatalf("Port %v in use.", Port)
+			common.Exit(fmt.Sprintf("Port %v in use.", Port), 1)
 		}
 
-		commands := []string{
-			fmt.Sprintf("sudo sed -i 's/^.*#*.*Port.*$/Port %v/' /etc/ssh/sshd_config", Port),
-			fmt.Sprintf("sudo sed -i 's/^Port.*$/Port %v/' /etc/ssh/sshd_config", Port),
-			"sudo service ssh reload 2>&1 >/dev/null",
-			fmt.Sprintf("echo 'Port %v is ready.'", Port),
+		if !Force {
+			anwser := common.AskQuestion(
+				fmt.Sprintf("Change '%s' port?", hostname),
+				[]string{"Y", "n"},
+			)
+			if strings.ToUpper(anwser) != "Y" {
+				os.Exit(1)
+			}
 		}
 
-		msg, err := ssh.Exec(commands, host, Pwd, true)
+		msg, err := setPort(Port, host, Pwd, true)
 		if err != nil {
-			log.Fatal(err)
+			common.Exit(err.Error(), 1)
 		}
 
 		fmt.Print(msg)
@@ -52,6 +55,17 @@ var setportCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(setportCmd)
-	setportCmd.Flags().BoolVarP(&Force, "force", "f", false, "be careful")
 	setportCmd.Flags().UintVarP(&Port, "number", "N", 22, "0 is a random number")
+	setportCmd.Flags().BoolVarP(&Force, "force", "f", false, "no need to confirm")
+}
+
+func setPort(port uint, host config.Host, pwd string, force bool) (string, error) {
+	commands := []string{
+		fmt.Sprintf("sudo sed -i 's/^.*#*.*Port.*$/Port %v/' /etc/ssh/sshd_config", Port),
+		fmt.Sprintf("sudo sed -i 's/^Port.*$/Port %v/' /etc/ssh/sshd_config", Port),
+		"sudo service ssh reload 2>&1 >/dev/null",
+		fmt.Sprintf("echo 'Port %v is ready.'", Port),
+	}
+
+	return ssh.Exec(commands, host, pwd, force)
 }

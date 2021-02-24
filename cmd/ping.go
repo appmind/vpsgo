@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
+	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
 	"github.com/appmind/vpsgo/ssh"
 	"github.com/spf13/cobra"
@@ -26,7 +26,7 @@ var pingCmd = &cobra.Command{
 
 		msg, err := ping(host, Pwd, true)
 		if err != nil {
-			log.Fatal(err)
+			common.Exit(err.Error(), 1)
 		}
 		fmt.Print(msg)
 	},
