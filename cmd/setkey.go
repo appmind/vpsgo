@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	"os"
+	"strings"
 
 	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
@@ -11,34 +12,36 @@ import (
 )
 
 var setkeyCmd = &cobra.Command{
-	Use:   "setkey ADDRESS",
+	Use:   "setkey [hostname]",
 	Short: "Generate key file and set password-free login",
 	Long:  `Generate key file and set password-free login.`,
-	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		addr := args[0]
-		name := common.MakeHash([]string{addr, User})[0:5]
+		hostname := config.GetHostname(args)
+		host, err := config.GetHostByName(hostname)
+		if err != nil {
+			common.Exit(err.Error(), 1)
+		}
 
-		// Prepare host login parameters
-		host := config.Host{
-			ID:      name,
-			Name:    name,
-			Addr:    addr,
-			Port:    Port,
-			User:    User,
-			Keyfile: Keyfile,
+		if !Force {
+			anwser := common.AskQuestion(
+				fmt.Sprintf("Change '%s' Key file?", hostname),
+				[]string{"Y", "n"},
+			)
+			if strings.ToUpper(anwser) != "Y" {
+				os.Exit(1)
+			}
 		}
 
 		// Generate new key
-		newKey, err := common.MakeKeyfile(host.Name, true)
+		newKey, err := common.MakeKeyfile(host.ID, Force)
 		if err != nil {
-			log.Fatal(err)
+			common.Exit(err.Error(), 1)
 		}
 
 		// Set new key
 		msg, err := setPubkey(newKey, host, Pwd, true)
 		if err != nil {
-			log.Fatal(err)
+			common.Exit(err.Error(), 1)
 		}
 
 		fmt.Print(msg)
@@ -50,20 +53,16 @@ var setkeyCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(setkeyCmd)
-	// setkeyCmd.Flags().BoolVarP(&Force, "force", "f", false, "rebuilt id files")
-	setkeyCmd.Flags().UintVarP(&Port, "port", "p", 22, "port number of the ssh service")
-	setkeyCmd.Flags().StringVarP(&User, "user", "u", "root", "username of the system running ssh")
-	setkeyCmd.Flags().StringVarP(&Keyfile, "idfile", "i", "", "id file for ssh login")
-	setkeyCmd.Flags().StringVarP(&Pwd, "password", "P", "", "password or passphrase")
+	setkeyCmd.Flags().BoolVarP(&Force, "force", "f", false, "no need to confirm")
 }
 
 func setPubkey(file string, host config.Host, pwd string, force bool) (string, error) {
 	keystr, err := common.GetKeyString(file + ".pub")
 	if err != nil {
-		log.Fatal(err)
+		common.Exit(err.Error(), 1)
 	}
 	if keystr == "" || len(keystr) > 255 {
-		log.Fatal("Invalid public key.")
+		common.Exit("Invalid public key", 1)
 	}
 
 	commands := []string{

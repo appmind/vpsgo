@@ -43,7 +43,7 @@ clean:
 run:
 	@go run -race $(APP).go
 
-test:
+test: install
 	@go test -cover ./...
 
 deps:

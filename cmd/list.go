@@ -17,7 +17,7 @@ var listCmd = &cobra.Command{
 		active := viper.GetString("active")
 		viper.UnmarshalKey("hosts", &hosts)
 		for _, v := range hosts {
-			if v.ID == active {
+			if v.ID == active || v.Name == active {
 				fmt.Printf("* %s %s@%s:%d %s %s\n", v.ID, v.User, v.Addr, v.Port, v.Name, v.Keyfile)
 			} else {
 				fmt.Printf("  %s %s@%s:%d %s %s\n", v.ID, v.User, v.Addr, v.Port, v.Name, v.Keyfile)

@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,7 +44,7 @@ func setConfig() {
 		viper.Set("hosts", []Host{})
 		viper.Set("services", []Service{})
 		if err = viper.SafeWriteConfig(); err != nil {
-			log.Fatal(err)
+			common.Exit(err.Error(), 1)
 		}
 	}
 }
@@ -64,35 +63,35 @@ func LoadConfig() error {
 }
 
 func AppendHost(host Host) []Host {
-	var found = false
-	var index int
+	index := -1
 	hosts := []Host{}
 	viper.UnmarshalKey("hosts", &hosts)
 	for key, value := range hosts {
-		if value.Name == host.Name {
-			found = true
+		if value.ID == host.ID {
 			index = key
 			break
 		}
 	}
-	if found {
-		hosts[index] = host
-	} else {
+
+	if index == -1 {
 		hosts = append(hosts, host)
+	} else {
+		host.Name = hosts[index].Name
+		hosts[index] = host
 	}
 	return hosts
 }
 
 func SaveHostToConfig(host Host) error {
 	return SaveConfig(map[string]interface{}{
-		"hosts":  AppendHost(host),
-		"active": host.Name,
+		"hosts": AppendHost(host),
+		// "active": host.Name,
 	})
 }
 
 func SetActiveHost(hostname string) error {
 	if _, err := GetHostByName(hostname); err != nil {
-		log.Fatal(err)
+		common.Exit(err.Error(), 1)
 	}
 	return SaveConfig(map[string]interface{}{
 		"active": hostname,
@@ -107,7 +106,7 @@ func GetHostname(args []string) (hostname string) {
 		hostname = viper.GetString("active")
 	}
 	if hostname == "" {
-		log.Fatal("Provide parameter or execute 'vps use' first.")
+		common.Exit("'hostname' in 'vps list' or execute 'vps use' first.", 1)
 	}
 
 	return
@@ -116,19 +115,20 @@ func GetHostname(args []string) (hostname string) {
 func GetHostByName(name string) (host Host, err error) {
 	index := -1
 	hosts := []Host{}
-	msg := fmt.Sprintf("'%s' does not exist, 'vps new' or 'vps list' first.", name)
-	err = errors.New(msg)
 	viper.UnmarshalKey("hosts", &hosts)
 	for key, value := range hosts {
-		if value.Name == name {
+		// Both ID and hostname are supported
+		if value.Name == name || value.ID == name {
 			index = key
 			break
 		}
 	}
 
-	if index >= 0 {
+	if index == -1 {
+		msg := fmt.Sprintf("'%s' does not exist, 'vps new' or 'vps list' first.", name)
+		err = errors.New(msg)
+	} else {
 		host = hosts[index]
-		err = nil
 	}
 	return
 }

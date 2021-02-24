@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/appmind/vpsgo/config"
@@ -45,7 +44,8 @@ func Execute() {
 func init() {
 	// cobra.OnInitialize(initConfig)
 	if err := config.LoadConfig(); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	// Here you will define your flags and configuration settings.

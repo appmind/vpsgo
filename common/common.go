@@ -1,10 +1,10 @@
 package common
 
 import (
+	"bufio"
 	"crypto/sha1"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -38,7 +38,7 @@ func MakeHash(in []string) string {
 	return fmt.Sprintf("%x", v)
 }
 
-func MakeHostID(in []string) string {
+func MakeID(in []string) string {
 	return MakeHash(in)[0:5]
 }
 
@@ -46,14 +46,14 @@ func MakeHostID(in []string) string {
 func MakeKeyfile(name string, force bool) (string, error) {
 	keyfile := filepath.Join(GetAppHomeDir(), name)
 	if name == "" || keyfile == "" {
-		log.Fatal("Name is required.")
+		Exit("Name is required", 1)
 	}
 	if _, err := os.Stat(keyfile); err == nil {
 		if force {
 			os.Remove(keyfile)
 			os.Remove(keyfile + ".pub")
 		} else {
-			log.Fatalf("%s already exists.\n", keyfile)
+			Exit(fmt.Sprintf("%s already exists.\n", keyfile), 1)
 		}
 	}
 
@@ -84,4 +84,33 @@ func GetKeyString(keyfile string) (string, error) {
 func GetRandNumber(min, max int) int {
 	rand.Seed(time.Now().UnixNano())
 	return (rand.Intn(max-min+1) + min)
+}
+
+func Exit(msg string, code int) {
+	fmt.Println(msg)
+	os.Exit(code)
+}
+
+// AskQuestion prompt to enter anwser through terminal
+func AskQuestion(msg string, in []string) (anwser string) {
+	reader := bufio.NewReader(os.Stdin)
+	tips := strings.Join(in, "/")
+
+	for {
+		fmt.Printf("%s (%s): ", msg, tips)
+		anwser, _ = reader.ReadString('\n')
+		anwser = strings.TrimSpace(anwser)
+
+		for _, value := range in {
+			if anwser == "" {
+				if value == strings.ToUpper(value) {
+					return value
+				}
+			} else {
+				if strings.EqualFold(value, anwser) {
+					return
+				}
+			}
+		}
+	}
 }

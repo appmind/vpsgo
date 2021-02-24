@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"log"
 	"strings"
 
 	"github.com/appmind/vpsgo/common"
@@ -17,13 +16,12 @@ var newCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		addr := args[0]
-		code := []string{addr, User}
-		name := common.MakeHostID(code)
+		id := common.MakeID([]string{addr, User})
 
 		// Prepare host parameters
 		host := config.Host{
-			ID:      name,
-			Name:    name,
+			ID:      id,
+			Name:    id,
 			Addr:    addr,
 			Port:    Port,
 			User:    User,
@@ -31,13 +29,12 @@ var newCmd = &cobra.Command{
 		}
 
 		// Confirm you can login
-		commands := []string{"echo 'done.'"}
-		msg, err := ssh.Exec(commands, host, Pwd, true)
+		msg, err := ssh.Exec([]string{"echo 'ok'"}, host, Pwd, true)
 		if err != nil {
-			log.Fatal(err)
+			common.Exit(err.Error(), 1)
 		}
-		if strings.TrimSpace(msg) != "done." {
-			log.Fatal("Please check the parameters.")
+		if strings.TrimSpace(msg) != "ok" {
+			common.Exit("unknown error", 1)
 		}
 
 		// If ok, save it
