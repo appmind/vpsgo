@@ -42,19 +42,13 @@ func MakeID(in []string) string {
 	return MakeHash(in)[0:5]
 }
 
-// MakeKeyfile 调用 ssh-keygen 生成密钥保存到应用目录
+// MakeKeyfile generate the key and save it to the application directory
 func MakeKeyfile(name string, force bool) (string, error) {
-	keyfile := filepath.Join(GetAppHomeDir(), name)
-	if name == "" || keyfile == "" {
-		Exit("Name is required", 1)
-	}
+	timestamp := fmt.Sprintf("%v", time.Now().Unix())
+	keyfile := filepath.Join(GetAppHomeDir(), name+timestamp)
 	if _, err := os.Stat(keyfile); err == nil {
-		if force {
-			os.Remove(keyfile)
-			os.Remove(keyfile + ".pub")
-		} else {
-			Exit(fmt.Sprintf("%s already exists.\n", keyfile), 1)
-		}
+		// Use timestamp, but still prevent file name conflicts
+		Exit(fmt.Sprintf("%s already exists\n", keyfile), 1)
 	}
 
 	cmd := exec.Command(
@@ -67,7 +61,9 @@ func MakeKeyfile(name string, force bool) (string, error) {
 	)
 
 	stdout, err := cmd.Output()
-	fmt.Print(string(stdout))
+	if os.Getenv("GO") == "DEBUG" {
+		fmt.Print(string(stdout))
+	}
 	return keyfile, err
 }
 
@@ -78,7 +74,7 @@ func GetKeyString(keyfile string) (string, error) {
 	}
 	defer file.Close()
 	keystr, err := ioutil.ReadAll(file)
-	return string(keystr), err
+	return strings.TrimSpace(string(keystr)), err
 }
 
 func GetRandNumber(min, max int) int {

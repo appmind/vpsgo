@@ -2,8 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"strings"
+	"strconv"
 
 	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
@@ -11,58 +10,50 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var pno uint = 0
+
 var setportCmd = &cobra.Command{
-	Use:   "setport [hostname]",
+	Use:   "setport HOSTNAME",
 	Short: "Change port (perhaps need to configure firewall)",
 	Long:  `Change the ssh port number (perhaps need to configure firewall).`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		hostname := config.GetHostname(args)
-		host, err := config.GetHostByName(hostname)
-		if err != nil {
-			common.Exit(err.Error(), 1)
+		if !Force && (pno != 0 && pno != 22 && pno < 1024) {
+			common.Exit("Port number: 22 | >=1024 | 0(random)", 1)
+		}
+		if pno == 0 {
+			pno = uint(common.GetRandNumber(32768, 61000))
 		}
 
-		if !Force && (Port != 22 && Port != 0) {
-			common.Exit("Only 22 or 0 is allowed", 1)
-		}
-		if Port == 0 {
-			Port = uint(common.GetRandNumber(32768, 61000))
-		}
-		if Port == host.Port {
-			common.Exit(fmt.Sprintf("Port %v in use.", Port), 1)
+		host := getHostConfirm(args[0],
+			"Change '%s' port to "+strconv.Itoa(int(pno))+" ?",
+		)
+		if pno == host.Port {
+			common.Exit(fmt.Sprintf("Port %v in use.", pno), 1)
 		}
 
-		if !Force {
-			anwser := common.AskQuestion(
-				fmt.Sprintf("Change '%s' port?", hostname),
-				[]string{"Y", "n"},
-			)
-			if strings.ToUpper(anwser) != "Y" {
-				os.Exit(1)
-			}
-		}
-
-		msg, err := setPort(Port, host, Pwd, true)
+		msg, err := setPort(pno, host, Pwd, true)
 		if err != nil {
 			common.Exit(err.Error(), 1)
 		}
 
 		fmt.Print(msg)
-		host.Port = Port
+		host.Port = pno
 		config.SaveHostToConfig(host)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(setportCmd)
-	setportCmd.Flags().UintVarP(&Port, "number", "N", 22, "0 is a random number")
-	setportCmd.Flags().BoolVarP(&Force, "force", "f", false, "no need to confirm")
+	setportCmd.Flags().BoolVarP(&Force, "force", "f", false, "no limit, no confirmation")
+	setportCmd.Flags().UintVar(&pno, "to", 0, "22 or >=1024 or 0(random number)")
+	setportCmd.MarkFlagRequired("to")
 }
 
 func setPort(port uint, host config.Host, pwd string, force bool) (string, error) {
 	commands := []string{
-		fmt.Sprintf("sudo sed -i 's/^.*#*.*Port.*$/Port %v/' /etc/ssh/sshd_config", Port),
-		fmt.Sprintf("sudo sed -i 's/^Port.*$/Port %v/' /etc/ssh/sshd_config", Port),
+		fmt.Sprintf("sudo sed -i 's/^#Port .*/Port %v/' /etc/ssh/sshd_config", Port),
+		fmt.Sprintf("sudo sed -i 's/^Port .*/Port %v/' /etc/ssh/sshd_config", Port),
 		"sudo service ssh reload 2>&1 >/dev/null",
 		fmt.Sprintf("echo 'Port %v is ready.'", Port),
 	}
