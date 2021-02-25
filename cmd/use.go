@@ -15,16 +15,19 @@ var useCmd = &cobra.Command{
 	Long:  `Set the default host by the name in the 'vps list'.`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		hostname := args[0] // cannot call config.GetHostname(args)
-		host, err := config.GetHostByName(hostname)
+		idname := args[0]
+		if idname == "." {
+			common.Exit("Need an actual host name", 1)
+		}
+		host, err := config.GetHostByName(idname)
 		if err != nil {
 			common.Exit(err.Error(), 1)
 		}
 
 		active := viper.GetString("active")
 		if host.ID != active && host.Name != active {
-			config.SetActiveHost(hostname)
-			fmt.Printf("The default host is '%s', represented by '.'\n", hostname)
+			config.SetActiveHost(host.Name)
+			fmt.Printf("The default host is '%s', represented by '.'\n", host.Name)
 		}
 	},
 }

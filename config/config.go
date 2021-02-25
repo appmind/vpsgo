@@ -98,21 +98,14 @@ func SetActiveHost(hostname string) error {
 	})
 }
 
-// GetHostname by the first parameter or configration
-func GetHostname(args []string) (hostname string) {
-	if len(args) > 0 {
-		hostname = args[0]
-	} else {
-		hostname = viper.GetString("active")
-	}
-	if hostname == "" {
-		common.Exit("'hostname' in 'vps list' or execute 'vps use' first.", 1)
-	}
-
-	return
-}
-
 func GetHostByName(name string) (host Host, err error) {
+	if name == "." {
+		name = viper.GetString("active")
+		if name == "" {
+			err = errors.New("No default host, 'vps use' first")
+			return
+		}
+	}
 	index := -1
 	hosts := []Host{}
 	viper.UnmarshalKey("hosts", &hosts)
@@ -125,7 +118,7 @@ func GetHostByName(name string) (host Host, err error) {
 	}
 
 	if index == -1 {
-		msg := fmt.Sprintf("'%s' does not exist, 'vps new' or 'vps list' first.", name)
+		msg := fmt.Sprintf("'%s' does not exist, 'vps new' or 'vps list' first", name)
 		err = errors.New(msg)
 	} else {
 		host = hosts[index]

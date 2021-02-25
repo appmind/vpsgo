@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
@@ -12,25 +11,12 @@ import (
 )
 
 var setkeyCmd = &cobra.Command{
-	Use:   "setkey [hostname]",
+	Use:   "setkey HOSTNAME",
 	Short: "Generate key file and set password-free login",
 	Long:  `Generate key file and set password-free login.`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		hostname := config.GetHostname(args)
-		host, err := config.GetHostByName(hostname)
-		if err != nil {
-			common.Exit(err.Error(), 1)
-		}
-
-		if !Force {
-			anwser := common.AskQuestion(
-				fmt.Sprintf("Change '%s' Key file?", hostname),
-				[]string{"Y", "n"},
-			)
-			if strings.ToUpper(anwser) != "Y" {
-				os.Exit(1)
-			}
-		}
+		host := getHostConfirm(args[0], "Change '%s' Key file?")
 
 		// Generate new key
 		newKey, err := common.MakeKeyfile(host.ID, Force)
@@ -45,6 +31,9 @@ var setkeyCmd = &cobra.Command{
 		}
 
 		fmt.Print(msg)
+		os.Remove(host.Keyfile)
+		os.Remove(host.Keyfile + ".pub")
+
 		// Update key
 		host.Keyfile = newKey
 		config.SaveHostToConfig(host)
@@ -53,7 +42,7 @@ var setkeyCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(setkeyCmd)
-	setkeyCmd.Flags().BoolVarP(&Force, "force", "f", false, "no need to confirm")
+	setkeyCmd.Flags().BoolVarP(&Force, "force", "f", false, "no confirmation")
 }
 
 func setPubkey(file string, host config.Host, pwd string, force bool) (string, error) {

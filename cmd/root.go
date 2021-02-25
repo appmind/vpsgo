@@ -3,7 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
 	"github.com/spf13/cobra"
 
@@ -83,4 +85,23 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func getHostConfirm(name string, question string) config.Host {
+	host, err := config.GetHostByName(name)
+	if err != nil {
+		common.Exit(err.Error(), 1)
+	}
+
+	if !Force {
+		anwser := common.AskQuestion(
+			fmt.Sprintf(question, host.Name),
+			[]string{"Y", "n"},
+		)
+		if strings.ToUpper(anwser) != "Y" {
+			os.Exit(1)
+		}
+	}
+
+	return host
 }

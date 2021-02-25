@@ -46,6 +46,6 @@ func init() {
 	rootCmd.AddCommand(newCmd)
 	newCmd.Flags().UintVarP(&Port, "port", "p", 22, "port number of the ssh service")
 	newCmd.Flags().StringVarP(&User, "user", "u", "root", "username of the system running ssh")
-	newCmd.Flags().StringVarP(&Keyfile, "idfile", "i", "", "id file for ssh login")
+	newCmd.Flags().StringVarP(&Keyfile, "idfile", "i", "", "identity file (private key)")
 	newCmd.Flags().StringVarP(&Pwd, "password", "P", "", "password or passphrase")
 }

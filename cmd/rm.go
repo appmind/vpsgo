@@ -56,12 +56,12 @@ var rmCmd = &cobra.Command{
 				"active": active,
 			})
 		} else {
-			fmt.Printf("hostname '%s' not found\n", idname)
+			fmt.Printf("host '%s' not found\n", idname)
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(rmCmd)
-	rmCmd.Flags().BoolVarP(&Force, "force", "f", false, "no need to confirm")
+	rmCmd.Flags().BoolVarP(&Force, "force", "f", false, "no confirmation")
 }

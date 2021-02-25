@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/appmind/vpsgo/common"
@@ -12,27 +11,14 @@ import (
 )
 
 var setpwdCmd = &cobra.Command{
-	Use:   "setpwd [hostname]",
+	Use:   "setpwd HOSTNAME",
 	Short: "Disable password login or Change password",
 	Long:  `Disable password login or Change password.`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		hostname := config.GetHostname(args)
-		host, err := config.GetHostByName(hostname)
-		if err != nil {
-			common.Exit(err.Error(), 1)
-		}
+		host := getHostConfirm(args[0], "Change '%s' password?")
 
-		if !Force {
-			anwser := common.AskQuestion(
-				fmt.Sprintf("Change '%s' password?", hostname),
-				[]string{"Y", "n"},
-			)
-			if strings.ToUpper(anwser) != "Y" {
-				os.Exit(1)
-			}
-		}
-
-		msg, err := setPwd(host, "", true)
+		msg, err := setPwd(host, Pwd, true)
 		if err != nil {
 			common.Exit(err.Error(), 1)
 		}
@@ -43,20 +29,21 @@ var setpwdCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(setpwdCmd)
-	setpwdCmd.Flags().BoolVarP(&Force, "force", "f", false, "no need to confirm")
-	setpwdCmd.Flags().StringVarP(&Pwd, "password", "P", "", "\"\" is empty, it is forbidden")
+	setpwdCmd.Flags().BoolVarP(&Force, "force", "f", false, "no confirmation")
+	setpwdCmd.Flags().StringVar(&Pwd, "to", "", "'' is empty, it is forbidden")
+	setpwdCmd.MarkFlagRequired("to")
 }
 
 func setPwd(host config.Host, pwd string, force bool) (string, error) {
 	commands := []string{}
-	if Pwd == "" {
+	if pwd == "" {
 		// Confirm that you can login without password
-		msg, err := ssh.Exec([]string{"echo 'ok'"}, host, pwd, true)
+		msg, err := ssh.Exec([]string{"echo 'ok'"}, host, "", true)
 		if err != nil {
 			common.Exit(err.Error(), 1)
 		}
 		if strings.TrimSpace(msg) != "ok" {
-			common.Exit("Maybe need to execute 'vps setkey' first", 1)
+			common.Exit("unknown error", 1)
 		}
 		commands = []string{
 			"sudo sed -i 's/PermitRootLogin yes/#PermitRootLogin prohibit-password/' /etc/ssh/sshd_config",
