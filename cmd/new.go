@@ -11,8 +11,8 @@ import (
 
 var newCmd = &cobra.Command{
 	Use:   "new ADDRESS",
-	Short: "Add a VPS host to list",
-	Long:  `Add a VPS host to the VPS list.`,
+	Short: "Add a host to VPS list",
+	Long:  `Add a host to the VPS list.`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		addr := args[0]

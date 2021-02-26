@@ -22,14 +22,15 @@ func GetHomeDir() (home string) {
 	return
 }
 
-func GetAppHomeDir() (path string) {
-	path = filepath.Join(GetHomeDir(), ".vps")
+func GetHostPath(name string) (path string) {
+	path = filepath.Join(GetHomeDir(), ".vps", name)
 	os.MkdirAll(path, 0770)
 	return
 }
 
-func ConfigFilename() string {
-	return filepath.Join(GetAppHomeDir(), "config.yaml")
+func GetConfigPath(name string) (path string) {
+	path = filepath.Join(GetHostPath(""), name)
+	return
 }
 
 func MakeHash(in []string) string {
@@ -45,7 +46,7 @@ func MakeID(in []string) string {
 // MakeKeyfile generate the key and save it to the application directory
 func MakeKeyfile(name string, force bool) (string, error) {
 	timestamp := fmt.Sprintf("%v", time.Now().Unix())
-	keyfile := filepath.Join(GetAppHomeDir(), name+timestamp)
+	keyfile := filepath.Join(GetHostPath(name), timestamp)
 	if _, err := os.Stat(keyfile); err == nil {
 		// Use timestamp, but still prevent file name conflicts
 		Exit(fmt.Sprintf("%s already exists\n", keyfile), 1)

@@ -13,7 +13,7 @@ import (
 
 var rmCmd = &cobra.Command{
 	Use:   "rm HOSTNAME",
-	Short: "Remove a VPS host from the VPS list",
+	Short: "Remove a host from the VPS list",
 	Long:  `Remove a VPS host from the VPS list.`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
