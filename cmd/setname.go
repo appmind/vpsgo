@@ -13,8 +13,8 @@ var newName string
 
 var setnameCmd = &cobra.Command{
 	Use:   "setname HOSTNAME",
-	Short: "Change hostname (perhaps need to restart VPS host)",
-	Long:  `Change the host name (perhaps need to restart VPS host).`,
+	Short: "Change host name (perhaps need to restart the host)",
+	Long:  `Change the host name (perhaps need to restart the host).`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		host := getHostConfirm(args[0], "Change name '%s' to '"+newName+"' ?")

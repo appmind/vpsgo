@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -16,6 +17,9 @@ var listCmd = &cobra.Command{
 		hosts := []config.Host{}
 		active := viper.GetString("active")
 		viper.UnmarshalKey("hosts", &hosts)
+		if len(hosts) == 0 {
+			common.Exit("list empty, execute 'vps new' first", 1)
+		}
 		for _, v := range hosts {
 			if v.ID == active || v.Name == active {
 				fmt.Printf("* %s@%s:%d %s:%s %s\n", v.User, v.Addr, v.Port, v.ID, v.Name, v.Keyfile)

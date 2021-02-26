@@ -32,7 +32,7 @@ type Service struct {
 }
 
 func setConfig() {
-	filename := common.ConfigFilename()
+	filename := common.GetConfigPath("config.yaml")
 	dir, file := filepath.Split(filename)
 	name := strings.Split(file, ".")
 	viper.SetConfigName(name[0])
