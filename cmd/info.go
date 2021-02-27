@@ -37,7 +37,7 @@ func info(host config.Host, pwd string, force bool) (string, error) {
 		"echo 'Local IP:             '`hostname -I`",
 		"echo 'Public IP:            '`curl -s ifconfig.me && echo`",
 		"echo 'Distribution:         '`cat /etc/os-release | grep NAME | head -n 1 | awk -F '=' '{gsub(/\"/,\"\",$2);print $2}' && cat /etc/os-release | grep VERSION | head -n 1 | awk -F '=' '{gsub(/\"/,\"\",$2);print $2}'`",
-		"echo 'Kernel Version:       '`uname -srm`",
+		"echo 'Kernel Release:       '`uname -srm`",
 		"echo 'OpenSSL Version:      '`openssl version`",
 		"echo 'Memory Size:          '`cat /proc/meminfo | grep MemTotal | awk '{print $2,$3}'`",
 		"echo 'Disk Size:           '`df -h --total | grep total | awk -F 'total' '{print $2}'`",

@@ -15,7 +15,7 @@ deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe m
 
 FROM BASE
 RUN apt-get update && apt-get install -y \
-  openssh-server sudo sed tzdata net-tools && \
+  openssh-server sudo sed tzdata net-tools curl && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \

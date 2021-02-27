@@ -2,13 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
+	"time"
 
 	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
 	"github.com/appmind/vpsgo/ssh"
 	"github.com/spf13/cobra"
 )
+
+var reset bool
 
 var setpwdCmd = &cobra.Command{
 	Use:   "setpwd HOSTNAME",
@@ -20,9 +22,12 @@ var setpwdCmd = &cobra.Command{
 		if err != nil {
 			common.Exit(err.Error(), 1)
 		}
+		if host.Keyfile == "" {
+			common.Exit("May needs to execute 'vps setkey' first", 1)
+		}
 
 		pwd := ""
-		if Force {
+		if reset {
 			pwd = common.AskPass(
 				fmt.Sprintf("%s@%s's password: ", host.User, host.Addr),
 			)
@@ -39,17 +44,14 @@ var setpwdCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(setpwdCmd)
-	setpwdCmd.Flags().BoolVar(&Force, "reset", false, "reset password")
+	setpwdCmd.Flags().BoolVar(&reset, "reset", false, "reset password")
 }
 
 func setPwd(host config.Host, pwd string, force bool) (string, error) {
-	// Confirm that you can login without password
-	msg, err := ssh.Exec([]string{"echo 'ok'"}, host, "", true)
+	// Confirm that you can login without password (login with key)
+	_, err := ssh.Exec([]string{"echo 'ok'"}, host, "", true)
 	if err != nil {
 		common.Exit(err.Error(), 1)
-	}
-	if strings.TrimSpace(msg) != "ok" {
-		common.Exit("unknown error", 1)
 	}
 
 	commands := []string{}
@@ -70,5 +72,6 @@ func setPwd(host config.Host, pwd string, force bool) (string, error) {
 		}
 	}
 
-	return ssh.Exec(commands, host, pwd, force)
+	time.Sleep(1 * time.Second)
+	return ssh.Exec(commands, host, "", true)
 }

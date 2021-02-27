@@ -102,7 +102,7 @@ func GetHostByName(name string) (host Host, err error) {
 	if name == "." {
 		name = viper.GetString("active")
 		if name == "" {
-			err = errors.New("No default host, 'vps use' first")
+			err = errors.New("No default host, execute 'vps use' first")
 			return
 		}
 	}
