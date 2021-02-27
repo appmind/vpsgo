@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"strings"
-
 	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
 	"github.com/appmind/vpsgo/ssh"
@@ -29,12 +27,13 @@ var newCmd = &cobra.Command{
 		}
 
 		// Confirm you can login
-		msg, err := ssh.Exec([]string{"echo 'ok'"}, host, Pwd, true)
+		commands := []string{
+			"sudo apt-get update",
+			"sudo apt-get install -yq curl",
+		}
+		_, err := ssh.Exec(commands, host, Pwd, true)
 		if err != nil {
 			common.Exit(err.Error(), 1)
-		}
-		if strings.TrimSpace(msg) != "ok" {
-			common.Exit("unknown error", 1)
 		}
 
 		// If ok, save it

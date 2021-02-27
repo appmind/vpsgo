@@ -34,11 +34,16 @@ func init() {
 
 func info(host config.Host, pwd string, force bool) (string, error) {
 	commands := []string{
-		"echo 'Kernel Name:          '`uname -s`",
-		"echo 'Kernel Release:       '`uname -r`",
-		"echo 'Kernel Version:       '`uname -v`",
-		"echo 'Network Node Name:    '`uname -n`",
-		"echo 'Machine architecture: '`uname -m`",
+		"echo 'Local IP:             '`hostname -I`",
+		"echo 'Public IP:            '`curl -s ifconfig.me && echo`",
+		"echo 'Distribution:         '`cat /etc/os-release | grep NAME | head -n 1 | awk -F '=' '{gsub(/\"/,\"\",$2);print $2}' && cat /etc/os-release | grep VERSION | head -n 1 | awk -F '=' '{gsub(/\"/,\"\",$2);print $2}'`",
+		"echo 'Kernel Version:       '`uname -srm`",
+		"echo 'OpenSSL Version:      '`openssl version`",
+		"echo 'Memory Size:          '`cat /proc/meminfo | grep MemTotal | awk '{print $2,$3}'`",
+		"echo 'Disk Size:           '`df -h --total | grep total | awk -F 'total' '{print $2}'`",
+		"echo 'CPU Model:           '`cat /proc/cpuinfo | grep 'model name' | uniq | awk -F ':' '{print $2}' && cat /proc/cpuinfo | grep processor | wc -l`",
+		"echo 'Time Zone:            '`cat /etc/timezone && date`",
+		"echo 'Host Name:            '`hostname`",
 	}
 	return ssh.Exec(commands, host, pwd, force)
 }

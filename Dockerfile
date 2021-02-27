@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:20.04 as BASE
 
 ARG TZ=Asia/Hong_Kong
 ARG DEBIAN_FRONTEND=noninteractive
@@ -13,8 +13,10 @@ deb http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe mu
 deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse'\
 >> /etc/apt/sources.list
 
-RUN apt-get update && apt-get install -y openssh-server sudo sed tzdata net-tools && \
-apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+FROM BASE
+RUN apt-get update && apt-get install -y \
+  openssh-server sudo sed tzdata net-tools && \
+  apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
 echo 'root:root' | chpasswd && \
