@@ -17,7 +17,7 @@ var useCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		idname := args[0]
 		if idname == "." {
-			common.Exit("need a hostname in the 'vps list'", 1)
+			common.Exit("Need a hostname in the 'vps list'", 1)
 		}
 		host, err := config.GetHostByName(idname)
 		if err != nil {

@@ -42,11 +42,9 @@ func init() {
 
 func ping(host config.Host, pwd string, force bool) (string, error) {
 	commands := []string{
-		"echo 'Kernel Name:          '`uname -s`",
-		"echo 'Kernel Release:       '`uname -r`",
-		"echo 'Kernel Version:       '`uname -v`",
 		"echo 'Network Node Name:    '`uname -n`",
-		"echo 'Machine architecture: '`uname -m`",
+		"echo 'OpenSSL Version:      '`openssl version`",
+		"echo 'Distribution:         '`cat /etc/os-release | grep NAME | head -n 1 | awk -F '=' '{gsub(/\"/,\"\",$2);print $2}' && cat /etc/os-release | grep VERSION | head -n 1 | awk -F '=' '{gsub(/\"/,\"\",$2);print $2}'`",
 	}
 	return ssh.Exec(commands, host, pwd, force)
 }
