@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/appmind/vpsgo/common"
 	"github.com/appmind/vpsgo/config"
 	"github.com/melbahja/goph"
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 // DefaultKnownHostsPath returns default user knows hosts file.
@@ -48,25 +48,6 @@ func DefaultKnownHosts() (ssh.HostKeyCallback, error) {
 	return goph.KnownHosts(path)
 }
 
-// prompt to enter password through terminal
-func askPass(msg string) string {
-
-	fmt.Print(msg)
-	fd := int(os.Stdin.Fd())
-
-	if terminal.IsTerminal(fd) {
-		pass, err := terminal.ReadPassword(fd)
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Println("")
-		return strings.TrimSpace(string(pass))
-	}
-
-	return ""
-}
-
 // Exec send and execute host commands via ssh
 func Exec(cmds []string, host config.Host, pwd string, force bool) (string, error) {
 	var err error
@@ -84,15 +65,20 @@ func Exec(cmds []string, host config.Host, pwd string, force bool) (string, erro
 	if host.Keyfile != "" {
 		// Start new ssh connection with private key.
 		if auth, err = goph.Key(host.Keyfile, pwd); err != nil {
+			if os.Getenv("GO") == "DEBUG" {
+				fmt.Println(err)
+			}
 			// ssh: this private key is passphrase protected
-			pwd = askPass("Private key passphrase: ")
+			pwd = common.AskPass("Private key passphrase: ")
 			if auth, err = goph.Key(host.Keyfile, pwd); err != nil {
 				return "", err
 			}
 		}
 	} else {
 		if pwd == "" {
-			pwd = askPass(fmt.Sprintf("%s@%s's password: ", host.User, host.Addr))
+			pwd = common.AskPass(
+				fmt.Sprintf("%s@%s's password: ", host.User, host.Addr),
+			)
 		}
 		auth = goph.Password(pwd)
 	}

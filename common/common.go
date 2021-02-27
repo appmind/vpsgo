@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // GetHomeDir returns the current user's home directory.
@@ -110,4 +112,23 @@ func AskQuestion(msg string, in []string) (anwser string) {
 			}
 		}
 	}
+}
+
+// AskPass prompt to enter password through terminal
+func AskPass(msg string) string {
+
+	fmt.Print(msg)
+	fd := int(os.Stdin.Fd())
+
+	if terminal.IsTerminal(fd) {
+		pass, err := terminal.ReadPassword(fd)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println("")
+		return strings.TrimSpace(string(pass))
+	}
+
+	return ""
 }

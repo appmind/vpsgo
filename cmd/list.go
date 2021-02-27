@@ -18,7 +18,7 @@ var listCmd = &cobra.Command{
 		active := viper.GetString("active")
 		viper.UnmarshalKey("hosts", &hosts)
 		if len(hosts) == 0 {
-			common.Exit("list empty, execute 'vps new' first", 1)
+			common.Exit("The host list is empty, execute 'vps new' first", 1)
 		}
 		for _, v := range hosts {
 			if v.ID == active || v.Name == active {
