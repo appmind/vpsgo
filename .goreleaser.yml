@@ -21,14 +21,14 @@ builds:
     goarch:
       - amd64
       - arm64
-    ignore:
-      - goos: linux
-        goarch: arm64
-      - goos: windows
-        goarch: arm64
+    # ignore:
+    #   - goos: linux
+    #     goarch: arm64
+    #   - goos: windows
+    #     goarch: arm64
 archives:
-  - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    replacements:
+  # - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+  - replacements:
       # linux: Linux
       # darwin: Darwin
       # windows: Windows
