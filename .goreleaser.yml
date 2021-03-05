@@ -1,3 +1,4 @@
+project_name: vpsgo
 env:
   - GO111MODULE=on
 before:
@@ -9,10 +10,10 @@ before:
     # you may remove this if you don't need go generate
     # - go generate ./...
 builds:
-  # - main: ./vps.go
-  #   id: "vps"
-  #   binary: vps
-  - env:
+  - id: "vps-amd64"
+    main: ./vps.go
+    binary: vps
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
@@ -20,12 +21,16 @@ builds:
       - windows
     goarch:
       - amd64
+  - id: vps-arm64
+    main: ./vps.go
+    binary: vps
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
       - arm64
-    # ignore:
-    #   - goos: linux
-    #     goarch: arm64
-    #   - goos: windows
-    #     goarch: arm64
 archives:
   # - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
   - replacements:
@@ -41,6 +46,10 @@ checksum:
   name_template: '{{ .ProjectName }}_checksums.txt'
 snapshot:
   name_template: "{{ .Tag }}-next"
+release:
+  github:
+    owner: appmind
+    name: vpsgo
 changelog:
   sort: asc
   filters:
