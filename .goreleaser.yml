@@ -32,7 +32,6 @@ builds:
     goarch:
       - arm64
 archives:
-  # - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
   - replacements:
       amd64: x86_64
       # 386: i386
@@ -53,7 +52,7 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-      - '(ci):'
+      - '\(ci\):'
       - '^build:'
       - '^chore:'
       - '^refactor:'
