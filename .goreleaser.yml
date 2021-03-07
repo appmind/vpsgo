@@ -43,15 +43,17 @@ checksum:
   name_template: '{{ .ProjectName }}_checksums.txt'
 snapshot:
   name_template: "{{ .Tag }}-next"
+release:
+  github:
+    owner: appmind
+    name: vpsgo
 changelog:
-  sort: asc
+  # sort: asc
   filters:
     exclude:
       - '^docs:'
       - '^test:'
+      - '(ci):'
       - '^build:'
       - '^chore:'
       - '^refactor:'
-      - Merge pull request
-      - Merge branch
-      - go mod tidy
