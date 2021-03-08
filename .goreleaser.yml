@@ -48,7 +48,7 @@ release:
     owner: appmind
     name: vpsgo
 changelog:
-  sort: asc
+  # sort: asc
   filters:
     exclude:
       - '^docs:'
