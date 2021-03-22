@@ -1,0 +1,59 @@
+project_name: vpsgo
+env:
+  - GO111MODULE=on
+before:
+  hooks:
+    # - go mod tidy
+    # - ./script/completions.sh
+    # You may remove this if you don't use go modules.
+    # - go mod download
+    # you may remove this if you don't need go generate
+    # - go generate ./...
+builds:
+  - id: vps-amd64
+    main: ./vps.go
+    binary: vps
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+  - id: vps-arm64
+    main: ./vps.go
+    binary: vps
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - arm64
+archives:
+  - name_template: '{{ .ProjectName }}_{{ .Version }}-{{ .Os }}-{{ .Arch }}'
+    replacements:
+      amd64: x86_64
+      # 386: i386
+    format_overrides:
+    - goos: windows
+      format: zip
+checksum:
+  name_template: '{{ .ProjectName }}-checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+release:
+  github:
+    owner: appmind
+    name: vpsgo
+changelog:
+  # sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '\(ci\):'
+      - '^build:'
+      - '^chore:'
+      - '^refactor:'
